@@ -1,3 +1,4 @@
+#-# Modified by D.C.-G. for translation purpose
 import textwrap
 from pygame import Rect, event
 from pygame.locals import *
@@ -5,7 +6,9 @@ from widget import Widget
 from controls import Label, Button
 from layout import Row, Column
 from fields import TextField
-
+#-#
+from translate import _
+#-#
 
 class Modal(object):
 
@@ -17,7 +20,6 @@ class Modal(object):
 
     def cancel(self):
         self.dismiss(False)
-
 
 class Dialog(Modal, Widget):
 
@@ -59,7 +61,6 @@ class Dialog(Modal, Widget):
             if response is not None:
                 self.dismiss(response)
 
-
 class QuickDialog(Dialog):
     """ Dialog that closes as soon as you click outside or press a key"""
     def mouse_down(self, evt):
@@ -72,25 +73,16 @@ class QuickDialog(Dialog):
         self.dismiss()
         event.post(evt)
 
-
 def wrapped_label(text, wrap_width, **kwds):
-    paras = text.split("\n")
+    # paras = text.split("\n")
+    text = _(text)
+    kwds['doNotTranslate'] = True
+    paras = text.split("\n\n")
     text = "\n".join([textwrap.fill(para, wrap_width) for para in paras])
     return Label(text, **kwds)
 
-#def alert(mess, wrap_width = 60, **kwds):
-#    box = Dialog(**kwds)
-#    d = box.margin
-#    lb = wrapped_label(mess, wrap_width)
-#    lb.topleft = (d, d)
-#    box.add(lb)
-#    box.shrink_wrap()
-#    return box.present()
-
-
 def alert(mess, **kwds):
     ask(mess, ["OK"], **kwds)
-
 
 def ask(mess, responses=["OK", "Cancel"], default=0, cancel=-1,
         wrap_width=60, **kwds):
@@ -118,7 +110,6 @@ def ask(mess, responses=["OK", "Cancel"], default=0, cancel=-1,
     box.add(col)
     box.shrink_wrap()
     return box.present()
-
 
 def input_text(prompt, width, initial=None, **kwds):
     box = Dialog(**kwds)

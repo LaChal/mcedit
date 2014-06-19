@@ -60,7 +60,7 @@ class TabPanel(Widget):
             self.show_page(page)
 
     def _add_page(self, title, page):
-        page.tab_title = title
+        page.tab_title = _(title)
         page.anchor = 'ltrb'
         self.pages.append(page)
 

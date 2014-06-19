@@ -1,5 +1,8 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf8 -*_
+
+#-# Modified by D.C.-G. for translation purpose
+
 """
 mcedit.py
 
@@ -63,6 +66,14 @@ logger.addHandler(fh)
 logger.addHandler(ch)
 
 import albow
+#-#
+albow.translate.setLangPath("./lang")
+import locale
+lang = locale.getdefaultlocale()[0]
+del locale
+albow.translate.buildTranslation(lang)
+from albow.translate import _
+#-#
 from albow.dialogs import Dialog
 from albow.openglwidgets import GLViewport
 from albow.root import RootWidget
@@ -109,7 +120,7 @@ class FileOpener(albow.Widget):
             config.config.get('Keys', 'Right'),
             config.config.get('Keys', 'Up'),
             config.config.get('Keys', 'Down'),
-        ).upper() + " to move")
+        ).upper() + _(" to move"))
         label.anchor = 'whrt'
         label.align = 'r'
         helpColumn.append(label)
@@ -120,7 +131,7 @@ class FileOpener(albow.Widget):
             label.align = "r"
             helpColumn.append(label)
 
-        addHelp("{0}".format(config.config.get('Keys', 'Brake').upper()) + " to slow down")
+        addHelp("{0}".format(config.config.get('Keys', 'Brake').upper()) + _(" to slow down"))
         addHelp("Right-click to toggle camera control")
         addHelp("Mousewheel to control tool distance")
         addHelp("Hold SHIFT to move along a major axis")
@@ -358,7 +369,7 @@ class KeyConfigPanel(Dialog):
         panel.bg_color = (0.5, 0.5, 0.6, 1.0)
 
         if labelString is None:
-            labelString = "Press a key to assign to the action \"{0}\"\n\nPress ESC to cancel.".format(configKey)
+            labelString = _("Press a key to assign to the action \"{0}\"\n\nPress ESC to cancel.").format(_(configKey))
         label = albow.Label(labelString)
         panel.add(label)
         panel.shrink_wrap()
@@ -383,10 +394,10 @@ class KeyConfigPanel(Dialog):
             config.config.set("Keys", configKey, keyname)
             for keyname, setting in occupiedKeys:
                 if self.askAssignKey(setting,
-                                     "The key {0} is no longer bound to {1}.\n"
+                                     _("The key {0} is no longer bound to {1}.\n"
                                      "Press a new key for the action \"{1}\"\n\n"
-                                     "Press ESC to cancel."
-                                     .format(keyname, setting)):
+                                     "Press ESC to cancel.")
+                                     .format(keyname, _(setting))):
                     config.config.set("Keys", configKey, oldkey)
                     return True
         else:
@@ -587,20 +598,20 @@ class OptionsPanel(Dialog):
         Settings.blockBuffer.set(int(val * 1048576))
 
     def portableButtonTooltip(self):
-        return ("Click to make your MCEdit install self-contained by moving the settings and schematics into the program folder",
-                "Click to make your MCEdit install persistent by moving the settings and schematics into your Documents folder")[mcplatform.portable]
+        return (_("Click to make your MCEdit install self-contained by moving the settings and schematics into the program folder"),
+                _("Click to make your MCEdit install persistent by moving the settings and schematics into your Documents folder"))[mcplatform.portable]
 
     @property
     def portableLabelText(self):
-        return ("Install Mode: Portable", "Install Mode: Fixed")[1 - mcplatform.portable]
+        return (_("Install Mode: Portable"), _("Install Mode: Fixed"))[1 - mcplatform.portable]
 
     def togglePortable(self):
         textChoices = [
-             "This will make your MCEdit \"portable\" by moving your settings and schematics into the same folder as {0}. Continue?".format((sys.platform == "darwin" and "the MCEdit application" or "MCEditData")),
-             "This will move your settings and schematics to your Documents folder. Continue?",
+             _("This will make your MCEdit \"portable\" by moving your settings and schematics into the same folder as {0}. Continue?").format((sys.platform == "darwin" and _("the MCEdit application") or _("MCEditData"))),
+             _("This will move your settings and schematics to your Documents folder. Continue?"),
         ]
         if sys.platform == "darwin":
-            textChoices[1] = "This will move your schematics to your Documents folder and your settings to your Preferences folder. Continue?"
+            textChoices[1] = _("This will move your schematics to your Documents folder and your settings to your Preferences folder. Continue?")
 
         alertText = textChoices[mcplatform.portable]
         if albow.ask(alertText) == "OK":
@@ -608,7 +619,7 @@ class OptionsPanel(Dialog):
                 [mcplatform.goPortable, mcplatform.goFixed][mcplatform.portable]()
             except Exception, e:
                 traceback.print_exc()
-                albow.alert(u"Error while moving files: {0}".format(repr(e)))
+                albow.alert(_(u"Error while moving files: {0}").format(repr(e)))
 
         self.goPortableButton.tooltipText = self.portableButtonTooltip()
 
@@ -855,7 +866,7 @@ class MCEdit(GLViewport):
 
     def confirm_quit(self):
         if self.editor.unsavedEdits:
-            result = albow.ask("There are {0} unsaved changes.".format(self.editor.unsavedEdits),
+            result = albow.ask(_("There are {0} unsaved changes.").format(self.editor.unsavedEdits),
                      responses=["Save and Quit", "Quit", "Cancel"])
             if result == "Save and Quit":
                 self.saveAndQuit()
@@ -910,8 +921,8 @@ class MCEdit(GLViewport):
 
             if update_version:
                 answer = albow.ask(
-                    'Version "%s" is available, would you like to '
-                    'download it?' % update_version,
+                    _('Version "%s" is available, would you like to '
+                    'download it?') % update_version,
                     [
                         'Yes',
                         'No',
@@ -931,7 +942,7 @@ class MCEdit(GLViewport):
                             'cleaning up': u"Cleaning up...",
                             'done': u"Done."
                         }
-                        text = status_texts.get(status, 'Unknown').format(**args)
+                        text = _(status_texts.get(status, 'Unknown')).format(**args)
 
                         panel = Dialog()
                         panel.idleevent = lambda event: panel.dismiss()
@@ -943,9 +954,9 @@ class MCEdit(GLViewport):
                     try:
                         app.auto_update(callback)
                     except (esky.EskyVersionError, EnvironmentError):
-                        albow.alert("Failed to install update %s" % update_version)
+                        albow.alert(_("Failed to install update %s") % update_version)
                     else:
-                        albow.alert("Version %s installed. Restart MCEdit to begin using it." % update_version)
+                        albow.alert(_("Version %s installed. Restart MCEdit to begin using it.") % update_version)
                         raise SystemExit()
 
         if mcedit.closeMinecraftWarning:

@@ -26,3 +26,6 @@ RELEASE-VERSION
 .DS_Store
 .idea
 
+# Other stuff
+translation.out
+
